@@ -30,7 +30,7 @@ def register_handle(request):
     user.uemail = uemail
     user.save()
     # 注册成功，转到登录页面
-    context = {'title': '用户登录', 'uname': uname}
+    context = {'title': '用户登录', 'uname': uname, 'page_name': 1}
     return render(request, 'df_user/login.html', context)
 
 
@@ -44,7 +44,7 @@ def register_exist(request):
 
 def login(request):
     uname = request.COOKIES.get('uname', '')
-    context = {'title': '用户登录', 'error_name': 0, 'error_pwd': 0, "uname": uname}
+    context = {'title': '用户登录', 'error_name': 0, 'error_pwd': 0, "uname": uname, 'page_name': 1}
     return render(request, 'df_user/login.html', context)
 
 
@@ -72,10 +72,10 @@ def login_handle(request):
             request.session['user_name'] = uname
             return red
         else:
-            context = {'title': '用户登录', 'error_name': 0, 'error_pwd': 1, 'uname': uname, 'upwd': upwd}
+            context = {'title': '用户登录', 'error_name': 0, 'error_pwd': 1, 'uname': uname, 'upwd': upwd, 'page_name': 1}
             return render(request, 'df_user/login.html', context)
     else:
-        context = {'title': '用户登录', 'error_name': 1, 'error_pwd': 0, 'uname': uname, 'upwd': upwd}
+        context = {'title': '用户登录', 'error_name': 1, 'error_pwd': 0, 'uname': uname, 'upwd': upwd, 'page_name': 1}
         return render(request, 'df_user/login.html', context)
 
 
@@ -84,12 +84,13 @@ def info(request):
     context = {'title': '用户中心',
                'user_email': user_email,
                'user_name': request.session['user_name'],
+               'page_name': 1,
                }
     return render(request, 'df_user/user_center_info.html', context)
 
 
 def order(request):
-    context = {'title': '订单中心'}
+    context = {'title': '订单中心', 'page_name': 1}
     return render(request, 'df_user/user_center_order.html', context)
 
 
@@ -103,7 +104,7 @@ def site(request):
         user.uzip = post.get('uzip')
         user.uphone = post.get('uphone')
         user.save()
-    context = {'title': '收货地址', 'user': user}
+    context = {'title': '收货地址', 'user': user, 'page_name': 1}
     return render(request, 'df_user/user_center_site.html', context)
 
 
