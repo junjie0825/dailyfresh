@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect
 from .models import *
 from hashlib import sha1
 from django.http import JsonResponse, HttpResponseRedirect
+from . import user_decorator
+from df_goods.models import *
 
 
 def register(request):
@@ -62,12 +64,13 @@ def login_handle(request):
         s1 = sha1()
         s1.update(upwd.encode("utf8"))
         if s1.hexdigest() == users[0].upwd:
-            red = HttpResponseRedirect('/user/info/')
+            url = request.COOKIES.get('url', '/')
+            red = HttpResponseRedirect(url)
             # 记住用户名
             if remember_name != 0:
                 red.set_cookie('uname', uname)
             else:
-                red.set_cookie('uname', '', max_age=-1) #max_age过期时间
+                red.set_cookie('uname', '', max_age=-1)  # max_age过期时间
             request.session['user_id'] = users[0].id
             request.session['user_name'] = uname
             return red
@@ -79,21 +82,37 @@ def login_handle(request):
         return render(request, 'df_user/login.html', context)
 
 
+def logout(request):
+    request.session.clear()
+    return HttpResponseRedirect('/')
+
+
+@user_decorator.login
 def info(request):
     user_email = UserInfo.objects.get(id=request.session['user_id']).uemail
+    # 最近浏览
+    goods_ids = request.COOKIES.get('goods_ids', '')
+    goods_ids1 = goods_ids.split(',')
+    goods_list = []
+    for goods_id in goods_ids1:
+        goods_list.append(GoodsInfo.objects.get(id=int(goods_id)))
+
     context = {'title': '用户中心',
                'user_email': user_email,
                'user_name': request.session['user_name'],
                'page_name': 1,
+               'goods_list': goods_list,
                }
     return render(request, 'df_user/user_center_info.html', context)
 
 
+@user_decorator.login
 def order(request):
     context = {'title': '订单中心', 'page_name': 1}
     return render(request, 'df_user/user_center_order.html', context)
 
 
+@user_decorator.login
 def site(request):
     user = UserInfo.objects.get(id=request.session['user_id'])
     print(user.id)
